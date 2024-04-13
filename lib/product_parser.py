@@ -33,6 +33,7 @@ class ProductParser:
 
         sizes = self.get_sizes()
         parse_data["sizes"] = sizes
+        parse_data["sence_of_size"] = self.get_sence_of_size()
 
 
         title_prices = self.get_title_and_price()
@@ -125,6 +126,31 @@ class ProductParser:
         result["price"] = price_obj.text
         
         return result
+    
+    
+    
+    def get_sence_of_size(self):
+
+        try:
+            
+            bs_obj = BeautifulSoup(self.driver.page_source, "html.parser")
+            wrapper_obj = bs_obj.select(".pdpContainer")[0]
+            size_bar_obj = wrapper_obj.select(".sizeFitBar")[0]
+            score_obj = size_bar_obj.select(".test-marker.marker")[0]
+            sence_list = score_obj["class"]
+            scene_str  = sence_list[-1]
+            scene = scene_str.split("_")
+            num_list = scene[1:]
+    
+            if len(num_list) != 2:
+                raise RuntimeError("Number has more than 2 digits")
+    
+            return ".".join(num_list)
+        
+
+        except IndexError:
+            return "No sence of size"
+
     
     def get_coordinates(self):
         coordinate_dr = None
@@ -334,12 +360,18 @@ if __name__ == "__main__":
     urls = [
             "https://shop.adidas.jp/products/IA4877/",
             "https://shop.adidas.jp/products/IA4846/",
-            "https://shop.adidas.jp/products/IU2341/"
+            "https://shop.adidas.jp/products/IU2341/",
+            "https://shop.adidas.jp/products/IM0410/",
+            "https://shop.adidas.jp/products/IA4877/"
             ]
 
     for url in urls:
         parser = ProductParser(driver=driver, target_url= url)
         data = parser.parse()
-        print(data)
+
+        for key, value in data.items():
+            print(key)
+            print(value)
+            print("*" * 10)
     
        
