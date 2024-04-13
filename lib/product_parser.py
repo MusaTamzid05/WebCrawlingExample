@@ -332,6 +332,7 @@ if __name__ == "__main__":
     driver.maximize_window()
 
     urls = [
+            "https://shop.adidas.jp/products/IA4877/",
             "https://shop.adidas.jp/products/IA4846/",
             "https://shop.adidas.jp/products/IU2341/"
             ]
