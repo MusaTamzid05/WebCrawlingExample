@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 from bs4 import BeautifulSoup
 
@@ -130,8 +131,10 @@ class ProductParser:
         coordinate_dr = None
         
         try:
-            coordinate_dr = self.driver.find_element(By.CSS_SELECTOR, ".coordinate_box")
-        except NoSuchElementException:
+
+            coordinate_dr = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".coordinate_box")))
+            #coordinate_dr = self.driver.find_element(By.CSS_SELECTOR, ".coordinate_box")
+        except TimeoutException:
             print("No coordinates")
             return []
         
@@ -149,7 +152,6 @@ class ProductParser:
           
         
 
-            print("Waitting")
             time.sleep(1.0)
             parser = BeautifulSoup(self.driver.page_source, "html.parser")
             selected_obj  = parser.select(".coordinate_item_container")[0]
@@ -330,8 +332,14 @@ if __name__ == "__main__":
     driver = webdriver.Chrome()
     driver.maximize_window()
 
-    parser = ProductParser(driver=driver, target_url= "https://shop.adidas.jp/products/IA4846/")
-    data = parser.parse()
-    print(data)
+    urls = [
+            "https://shop.adidas.jp/products/IA4846/",
+            "https://shop.adidas.jp/products/IU2341/"
+            ]
+
+    for url in urls:
+        parser = ProductParser(driver=driver, target_url= url)
+        data = parser.parse()
+        print(data)
     
        
