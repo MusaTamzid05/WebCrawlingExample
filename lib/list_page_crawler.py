@@ -7,6 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import time
 
+from lib.product_parser import ProductParser
+
 class ListPageCrawler:
     def __init__(self, url, driver):
         self.root_url = url
@@ -37,7 +39,6 @@ class ListPageCrawler:
                     image_dr = link_dr.find_element(By.CSS_SELECTOR, ".image_link.test-image_link")
                     link = image_dr.get_attribute("href")
                     print(f"{index} => {link}")
-                    '''
                     
                     if product_driver is None:
                         product_driver = webdriver.Chrome()
@@ -46,7 +47,6 @@ class ListPageCrawler:
                     parser = ProductParser(target_url=link, driver=product_driver)
                     parse_data = parser.parse()
                     print(f"{index} => {parse_data}")
-                    '''
                         
                 except NoSuchElementException :
                     self.driver.execute_script('window.scrollBy(0, 500)')

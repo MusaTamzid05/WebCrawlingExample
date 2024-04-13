@@ -151,7 +151,7 @@ class ProductParser:
           
         
 
-            time.sleep(1.0)
+            time.sleep(3.0)
             parser = BeautifulSoup(self.driver.page_source, "html.parser")
             selected_obj  = parser.select(".coordinate_item_container")[0]
             url_obj = selected_obj.select(".test-link_a")[0]
