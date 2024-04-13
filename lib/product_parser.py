@@ -16,6 +16,8 @@ class ProductParser:
         self.driver = driver
         self.driver.get(target_url)
         self.src_url = src_url
+        self.target_url = target_url
+        self.product_id = target_url.split("/")[-2]
 
     def parse(self):
         print("parsing data")
@@ -23,6 +25,8 @@ class ProductParser:
         
         image_urls = self.get_image_urls()
 
+        parse_data["product_id"] = self.product_id
+        parse_data["product_url"] = self.target_url
         parse_data["image_urls"] = image_urls
 
 
@@ -56,7 +60,7 @@ class ProductParser:
         parse_data["chart_size"] = chart_size
 
         tags = self.get_tags()
-        parse_data["tags"] = tags
+        parse_data["KWS"] = tags
 
     
 
@@ -184,11 +188,11 @@ class ProductParser:
             parser = BeautifulSoup(self.driver.page_source, "html.parser")
             selected_obj  = parser.select(".coordinate_item_container")[0]
             url_obj = selected_obj.select(".test-link_a")[0]
-            info["url"] = url_obj["href"]
+            info["url"] = self.src_url +  url_obj["href"]
             #time.sleep(0.5)
         
             image_obj = url_obj.select(".coordinate_item_image")[0]
-            info["image_url"] = image_obj["src"]
+            info["image_url"] = self.src_url +  image_obj["src"]
             title_obj = selected_obj.select(".title")[0]
             info["title"] = title_obj.text
             price_obj = selected_obj.select(".price-value")[0]
@@ -353,12 +357,13 @@ class ProductParser:
         for tag_obj in tag_objs:
             tags.append(tag_obj.text)
 
-        return tags
+        return ",".join(tags)
 
 
 if __name__ == "__main__":
     driver = webdriver.Chrome()
     driver.maximize_window()
+    results = []
 
     urls = [
             "https://shop.adidas.jp/products/IA4877/",
@@ -378,5 +383,9 @@ if __name__ == "__main__":
             print("")
 
         print("*" * 30)
+        results.append(data)
+
+    print("\n\n\n")
+    print(results)
     
        
