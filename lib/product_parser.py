@@ -31,13 +31,15 @@ class ProductParser:
       
         parse_data["breadcrumb_categories"] = breadcrumb_categories
 
-        sizes = self.get_sizes()
+        category_name, sizes = self.get_sizes()
         parse_data["sizes"] = sizes
+        parse_data["category_name"] = category_name
+
         parse_data["sence_of_size"] = self.get_sence_of_size()
 
 
         title_prices = self.get_title_and_price()
-        parse_data["title_prices"] = title_prices
+        parse_data["basic_info"] = title_prices
         self.driver.execute_script('window.scrollBy(0, 1200)') 
         time.sleep(0.5)
 
@@ -62,6 +64,8 @@ class ProductParser:
 
         if len(ratting) == 0:
             return parse_data
+
+        parse_data["ratting"] = ratting
 
         reviews = self.get_user_reviews()
         parse_data["reviews"] = reviews
@@ -106,14 +110,13 @@ class ProductParser:
         sizes = []
         bs_obj = BeautifulSoup(self.driver.page_source, "html.parser")
         article_obj = bs_obj.select(".articlePurchaseBox")[0]
-        article_name = article_obj.select(".articleNameHeader > .groupName")[0].text
-        print(f"Article name {article_name}")
+        category_name = article_obj.select(".articleNameHeader > .groupName")[0].text
         article_size_obj = article_obj.select(".sizeSelectorListItem")
         
         for row in article_size_obj:
             sizes.append(row.text)
     
-        return sizes
+        return category_name , sizes
 
     def get_title_and_price(self):
         result = {}
@@ -372,6 +375,8 @@ if __name__ == "__main__":
         for key, value in data.items():
             print(key)
             print(value)
-            print("*" * 10)
+            print("")
+
+        print("*" * 30)
     
        
