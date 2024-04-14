@@ -1,4 +1,4 @@
-
+import pandas as pd
 
 class DataSaver:
     def __init__(self, data):
@@ -73,6 +73,38 @@ class DataSaver:
             print(coordinate_data_list)
             print(review_data_list)
             print(comfort_data_list)
+
+            self.save_excel(
+                    normal_data_list=normal_data_list,
+                    coordinate_data_list=coordinate_data_list,
+                    review_data_list=review_data_list,
+                    comfort_data_list=comfort_data_list
+                    )
+
+    def save_excel(
+            self,
+            normal_data_list,
+            coordinate_data_list,
+            review_data_list,
+            comfort_data_list
+            ):
+
+        writer = pd.ExcelWriter('output.xlsx', engine='xlsxwriter')
+
+        df_normal = pd.DataFrame(normal_data_list)
+        df_normal.to_excel(writer, sheet_name='Normal Data', index=False)
+
+        df_coordinates = pd.DataFrame(coordinate_data_list)
+        df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
+
+        df_review = pd.DataFrame(review_data_list)
+        df_review.to_excel(writer, sheet_name='Reviews', index=False)
+
+        df_comfort_data= pd.DataFrame(comfort_data_list)
+        df_comfort_data.to_excel(writer, sheet_name='Comfort', index=False)
+
+        writer.close()
+
 
 
 
