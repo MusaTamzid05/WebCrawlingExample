@@ -12,63 +12,76 @@ class DataSaver:
         comfort_data_list = []
 
         for row in self.data:
-            normal_data = {}
-            normal_data["product_id"] = row["product_id"]
-            normal_data["product_url"] = row["product_url"]
-            normal_data["image_urls"] = ",".join(row["image_urls"])
-            normal_data["breadcrumb_categories"] = row["breadcrumb_categories"]
-            normal_data["sizes"] = ",".join(row["sizes"])
-            normal_data["category_name"] = row["category_name"]
-            normal_data["sence_of_size"] = row["sence_of_size"]
-            normal_data["title"] = row["basic_info"]["title"]
-            normal_data["price"] = row["basic_info"]["price"]
+            try:
+                normal_data = {}
+                normal_data["product_id"] = row["product_id"]
+                normal_data["product_url"] = row["product_url"]
+                normal_data["image_urls"] = ",".join(row["image_urls"])
+                normal_data["breadcrumb_categories"] = row["breadcrumb_categories"]
+                normal_data["sizes"] = ",".join(row["sizes"])
+                normal_data["category_name"] = row["category_name"]
+                normal_data["sence_of_size"] = row["sence_of_size"]
+                normal_data["title"] = row["basic_info"]["title"]
+                normal_data["price"] = row["basic_info"]["price"]
 
-            if len(row["coordinates"]) > 0:
-                coordinate_data = {}
-                for coordinate_row in row["coordinates"]:
-                    coordinate_data["title"] = coordinate_row["title"]
-                    coordinate_data["src_product_url"] = row["product_url"]
-                    coordinate_data["url"] = coordinate_row["url"]
-                    coordinate_data["image_url"] = coordinate_row["image_url"]
-                    coordinate_data["price"] = coordinate_row["price"]
-                    coordinate_data_list.append(coordinate_data)
-
-
-            normal_data["title_of_description"] = row["inner_data"]["heading"]
-            normal_data["general_description"] = row["inner_data"]["description"]
-            normal_data["description_itemization"] = ",".join(row["inner_data"]["points"])
-            normal_data["tall_of_size"] = row["chart_size"]
-            normal_data["KWS"] = row["KWS"]
-            normal_data["user_ratting"] = row["ratting"]["user_ratting"]
-            normal_data["user_ratting_count"] = row["ratting"]["user_count"]
-            normal_data["user_ratting_percentage"] = row["ratting"]["percentage"]
+                if len(row["coordinates"]) > 0:
+                    coordinate_data = {}
+                    for coordinate_row in row["coordinates"]:
+                        coordinate_data["title"] = coordinate_row["title"]
+                        coordinate_data["src_product_url"] = row["product_url"]
+                        coordinate_data["url"] = coordinate_row["url"]
+                        coordinate_data["image_url"] = coordinate_row["image_url"]
+                        coordinate_data["price"] = coordinate_row["price"]
+                        coordinate_data_list.append(coordinate_data)
 
 
-            normal_data_list.append(normal_data)
+                normal_data["title_of_description"] = row["inner_data"]["heading"]
+                normal_data["general_description"] = row["inner_data"]["description"]
+                normal_data["description_itemization"] = ",".join(row["inner_data"]["points"])
+                normal_data["tall_of_size"] = row["chart_size"]
+                normal_data["KWS"] = row["KWS"]
 
-            if len(row["reviews"]) > 0:
+                if "ratting" in row:
+                    normal_data["user_ratting"] = row["ratting"]["user_ratting"]
+                    normal_data["user_ratting_count"] = row["ratting"]["user_count"]
+                    normal_data["user_ratting_percentage"] = row["ratting"]["percentage"]
+                else:
 
-                for review in row["reviews"]:
-                    review_data = {}
-                    review_data["product_url"] = row["product_url"]
-                    review_data["title"] = review["title"]
-                    review_data["text"] = review["text"]
-                    review_data["username"] = review["username"]
-                    review_data["date"] = review["date"]
-                    review_data["review_ratting"] = review["review_ratting"]
-
-                    review_data_list.append(review_data)
-
-            if len(row["scene_of_comforts"]) > 0:
-                for comfort in row["scene_of_comforts"]:
-                    comfort_data = {}
-                    comfort_data["product_url"] = row["product_url"]
-                    comfort_data["min"] = comfort["min"]
-                    comfort_data["max"] = comfort["max"]
-                    comfort_data["title"] = comfort["title"]
+                    normal_data["user_ratting"] = "N/A"
+                    normal_data["user_ratting_count"] = "N/A"
+                    normal_data["user_ratting_percentage"] = "N/A"
 
 
-                    comfort_data_list.append(comfort_data)
+
+                normal_data_list.append(normal_data)
+
+                if len(row["reviews"]) > 0:
+
+                    for review in row["reviews"]:
+                        review_data = {}
+                        review_data["product_url"] = row["product_url"]
+                        review_data["title"] = review["title"]
+                        review_data["text"] = review["text"]
+                        review_data["username"] = review["username"]
+                        review_data["date"] = review["date"]
+                        review_data["review_ratting"] = review["review_ratting"]
+
+                        review_data_list.append(review_data)
+
+                if len(row["scene_of_comforts"]) > 0:
+                    for comfort in row["scene_of_comforts"]:
+                        comfort_data = {}
+                        comfort_data["product_url"] = row["product_url"]
+                        comfort_data["min"] = comfort["min"]
+                        comfort_data["max"] = comfort["max"]
+                        comfort_data["title"] = comfort["title"]
+
+
+                        comfort_data_list.append(comfort_data)
+
+            except Exception as e:
+                print(f"Error saving data row => {e}")
+
 
         #print(normal_data_list)
         #print(coordinate_data_list)
@@ -94,29 +107,16 @@ class DataSaver:
         df_normal = pd.DataFrame(normal_data_list)
         df_coordinates = pd.DataFrame(coordinate_data_list)
         df_review = pd.DataFrame(review_data_list)
-        df_comfort_data= pd.DataFrame(comfort_data_list)
+        df_comfort_data = pd.DataFrame(comfort_data_list)
 
 
 
-        if os.path.exists(output_path):
-            excel = pd.read_excel(output_path)
-            print(f"{output_path} exits")
+        with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
 
-            with pd.ExcelWriter(output_path, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
-                df_normal.to_excel(writer, sheet_name='NormalData',  index=False)
-                df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
-                df_review.to_excel(writer, sheet_name='Reviews', index=False)
-                df_comfort_data.to_excel(writer, sheet_name='Comfort',  index=False)
-
-        else:
-            print(f"{output_path} does not exits")
-            # just create the file
-            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
-
-                df_normal.to_excel(writer, sheet_name='NormalData',  index=False)
-                df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
-                df_review.to_excel(writer, sheet_name='Reviews', index=False)
-                df_comfort_data.to_excel(writer, sheet_name='Comfort',  index=False)
+            df_normal.to_excel(writer, sheet_name='NormalData',  index=False)
+            df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
+            df_review.to_excel(writer, sheet_name='Reviews', index=False)
+            df_comfort_data.to_excel(writer, sheet_name='Comfort',  index=False)
 
 
 

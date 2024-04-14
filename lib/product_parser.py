@@ -22,62 +22,70 @@ class ProductParser:
     def parse(self):
         print("parsing data")
         parse_data = {}
+        skip = False
+
+        try:
+            image_urls = self.get_image_urls()
+
+            parse_data["product_id"] = self.product_id
+            parse_data["product_url"] = self.target_url
+            parse_data["image_urls"] = image_urls
+
+
+
+            breadcrumb_categories = self.get_breadcrumb_categories()
+          
+            parse_data["breadcrumb_categories"] = breadcrumb_categories
+
+            category_name, sizes = self.get_sizes()
+            parse_data["sizes"] = sizes
+            parse_data["category_name"] = category_name
+
+            parse_data["sence_of_size"] = self.get_sence_of_size()
+
+
+            title_prices = self.get_title_and_price()
+            parse_data["basic_info"] = title_prices
+            self.driver.execute_script('window.scrollBy(0, 1200)') 
+            time.sleep(0.5)
+
+            coordinates = self.get_coordinates()
+            parse_data["coordinates"] = coordinates
+
+
+            inner_data = self.get_inner_data()
+            parse_data["inner_data"] = inner_data
+
+            
+
+            chart_size = self.get_chart_size()
+            parse_data["chart_size"] = chart_size
+
+            tags = self.get_tags()
+            parse_data["KWS"] = tags
+
         
-        image_urls = self.get_image_urls()
 
-        parse_data["product_id"] = self.product_id
-        parse_data["product_url"] = self.target_url
-        parse_data["image_urls"] = image_urls
+            ratting, ratting_found = self.get_rattings()
 
+            if ratting_found == False:
+                return parse_data, skip
 
+            parse_data["ratting"] = ratting
 
-        breadcrumb_categories = self.get_breadcrumb_categories()
-      
-        parse_data["breadcrumb_categories"] = breadcrumb_categories
+            reviews = self.get_user_reviews()
+            parse_data["reviews"] = reviews
 
-        category_name, sizes = self.get_sizes()
-        parse_data["sizes"] = sizes
-        parse_data["category_name"] = category_name
+            scene_of_conforts = self.get_sence_of_comfort()
+            parse_data["scene_of_comforts"] = scene_of_conforts
 
-        parse_data["sence_of_size"] = self.get_sence_of_size()
-
-
-        title_prices = self.get_title_and_price()
-        parse_data["basic_info"] = title_prices
-        self.driver.execute_script('window.scrollBy(0, 1200)') 
-        time.sleep(0.5)
-
-        coordinates = self.get_coordinates()
-        parse_data["coordinates"] = coordinates
+        except Exception as e:
+            print(f"Error parsing {self.target_url} => {e}")
+            skip = True
 
 
-        inner_data = self.get_inner_data()
-        parse_data["inner_data"] = inner_data
 
-        
-
-        chart_size = self.get_chart_size()
-        parse_data["chart_size"] = chart_size
-
-        tags = self.get_tags()
-        parse_data["KWS"] = tags
-
-    
-
-        ratting = self.get_rattings()
-
-        if len(ratting) == 0:
-            return parse_data
-
-        parse_data["ratting"] = ratting
-
-        reviews = self.get_user_reviews()
-        parse_data["reviews"] = reviews
-
-        scene_of_conforts = self.get_sence_of_comfort()
-        parse_data["scene_of_comforts"] = scene_of_conforts
-
-        return parse_data
+        return parse_data, skip
         
             
 
@@ -201,7 +209,7 @@ class ProductParser:
             coordinates.append(info)
         
             coordinate_button_dr.click()
-            time.sleep(0.2)
+            time.sleep(0.3)
         
         return coordinates
 
@@ -234,8 +242,12 @@ class ProductParser:
 
     def get_chart_size(self):
 
-        self.driver.execute_script('window.scrollBy(0, 500)') 
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-zn7duo")))
+        try:
+
+            self.driver.execute_script('window.scrollBy(0, 500)') 
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-zn7duo")))
+        except TimeoutException:
+            return {}
 
         bs_chart_obj = BeautifulSoup(self.driver.page_source, "html.parser")
         chart_root_obj = bs_chart_obj.select(".css-zn7duo")[0]
@@ -291,16 +303,18 @@ class ProductParser:
     def get_rattings(self):
         
         info = {}
+        found = False
 
         try:
             
-            
+            self.driver.execute_script('window.scrollBy(0, 500)') 
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".BVRRRatingNormalOutOf")))
             review_score_obj = BeautifulSoup(self.driver.page_source, "html.parser")
             number_obj = review_score_obj.select(".BVRRRatingNormalOutOf")[0]
             info["user_ratting"] = number_obj.select(".BVRRNumber")[0].text
             info["user_count"] = review_score_obj.select(".BVRRBuyAgainTotal")[0].text
             info["percentage"] = review_score_obj.select(".BVRRBuyAgainPercentage")[0].text
-            return info
+            found = True
             
         except IndexError:
             print("No ratting")
@@ -308,7 +322,13 @@ class ProductParser:
             info["user_count"] = "N/A"
             info["percentage"] = "N/A"
 
-        return info
+        except Exception:
+            print("No ratting")
+            info["user_ratting"] = "N/A"
+            info["user_count"] = "N/A"
+            info["percentage"] = "N/A"
+
+        return info, found
 
     def get_user_reviews(self):
         reviews = []
@@ -332,6 +352,7 @@ class ProductParser:
 
     def get_sence_of_comfort(self):
         
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".BVRRRatingContainerRadio")))
         ratting_obj = BeautifulSoup(self.driver.page_source, "html.parser")
         radio_objs = ratting_obj.select(".BVRRRatingContainerRadio")[0]
         radio_obs = radio_objs.select(".BVRRRating")
@@ -388,7 +409,6 @@ if __name__ == "__main__":
         print("*" * 30)
         results.append(data)
 
-    print("\n\n\n")
     print(results)
     
        
