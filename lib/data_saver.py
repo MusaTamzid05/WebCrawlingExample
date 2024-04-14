@@ -34,11 +34,15 @@ class DataSaver:
                         coordinate_data["price"] = coordinate_row["price"]
                         coordinate_data_list.append(coordinate_data)
 
+                if "inner_data" in row:
 
-                normal_data["title_of_description"] = row["inner_data"]["heading"]
-                normal_data["general_description"] = row["inner_data"]["description"]
-                normal_data["description_itemization"] = ",".join(row["inner_data"]["points"])
-                normal_data["tall_of_size"] = row["chart_size"]
+                    normal_data["title_of_description"] = row["inner_data"]["heading"]
+                    normal_data["general_description"] = row["inner_data"]["description"]
+                    normal_data["description_itemization"] = ",".join(row["inner_data"]["points"])
+
+                if "chart_size" in row:
+                    normal_data["tall_of_size"] = row["chart_size"]
+                
                 normal_data["KWS"] = row["KWS"]
 
                 if "ratting" in row:
@@ -46,7 +50,6 @@ class DataSaver:
                     normal_data["user_ratting_count"] = row["ratting"]["user_count"]
                     normal_data["user_ratting_percentage"] = row["ratting"]["percentage"]
                 else:
-
                     normal_data["user_ratting"] = "N/A"
                     normal_data["user_ratting_count"] = "N/A"
                     normal_data["user_ratting_percentage"] = "N/A"
@@ -55,7 +58,7 @@ class DataSaver:
 
                 normal_data_list.append(normal_data)
 
-                if len(row["reviews"]) > 0:
+                if "reviews" in row:
 
                     for review in row["reviews"]:
                         review_data = {}
@@ -68,7 +71,7 @@ class DataSaver:
 
                         review_data_list.append(review_data)
 
-                if len(row["scene_of_comforts"]) > 0:
+                if "scene_of_comforts" in row:
                     for comfort in row["scene_of_comforts"]:
                         comfort_data = {}
                         comfort_data["product_url"] = row["product_url"]
