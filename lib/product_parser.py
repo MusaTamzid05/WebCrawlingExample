@@ -298,12 +298,15 @@ class ProductParser:
             review_score_obj = BeautifulSoup(self.driver.page_source, "html.parser")
             number_obj = review_score_obj.select(".BVRRRatingNormalOutOf")[0]
             info["user_ratting"] = number_obj.select(".BVRRNumber")[0].text
-            info["user_text"] = review_score_obj.select(".BVRRBuyAgainTotal")[0].text
-            info["perentage"] = review_score_obj.select(".BVRRBuyAgainPercentage")[0].text
+            info["user_count"] = review_score_obj.select(".BVRRBuyAgainTotal")[0].text
+            info["percentage"] = review_score_obj.select(".BVRRBuyAgainPercentage")[0].text
             return info
             
         except IndexError:
             print("No ratting")
+            info["user_ratting"] = "N/A"
+            info["user_count"] = "N/A"
+            info["percentage"] = "N/A"
 
         return info
 
@@ -318,8 +321,8 @@ class ProductParser:
             info = {}
             current_ob = review_ob.select(".BVRRRatingNormalImage")[0]
             image_obj = current_ob.select("img")[0]
-            info["title"] = image_obj["title"]
             info["title"] = review_ob.select(".BVRRReviewTitle")[0].text
+            info["review_ratting"] = image_obj["title"]
             info["text"]  = review_ob.select(".BVRRReviewText")[0].text
             info["username"] = review_ob.select(".BVRRNickname")[0].text
             info["date"] = review_ob.select(".BVRRReviewDate")[0].text
