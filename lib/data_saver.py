@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 class DataSaver:
     def __init__(self, data):
@@ -69,17 +70,17 @@ class DataSaver:
 
                     comfort_data_list.append(comfort_data)
 
-            print(normal_data_list)
-            print(coordinate_data_list)
-            print(review_data_list)
-            print(comfort_data_list)
+        #print(normal_data_list)
+        #print(coordinate_data_list)
+        #print(review_data_list)
+        #print(comfort_data_list)
 
-            self.save_excel(
-                    normal_data_list=normal_data_list,
-                    coordinate_data_list=coordinate_data_list,
-                    review_data_list=review_data_list,
-                    comfort_data_list=comfort_data_list
-                    )
+        self.save_excel(
+                normal_data_list=normal_data_list,
+                coordinate_data_list=coordinate_data_list,
+                review_data_list=review_data_list,
+                comfort_data_list=comfort_data_list
+                )
 
     def save_excel(
             self,
@@ -89,21 +90,34 @@ class DataSaver:
             comfort_data_list
             ):
 
-        writer = pd.ExcelWriter('output.xlsx', engine='xlsxwriter')
-
+        output_path = "./output.xlsx"
         df_normal = pd.DataFrame(normal_data_list)
-        df_normal.to_excel(writer, sheet_name='Normal Data', index=False)
-
         df_coordinates = pd.DataFrame(coordinate_data_list)
-        df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
-
         df_review = pd.DataFrame(review_data_list)
-        df_review.to_excel(writer, sheet_name='Reviews', index=False)
-
         df_comfort_data= pd.DataFrame(comfort_data_list)
-        df_comfort_data.to_excel(writer, sheet_name='Comfort', index=False)
 
-        writer.close()
+
+
+        if os.path.exists(output_path):
+            excel = pd.read_excel(output_path)
+            print(f"{output_path} exits")
+
+            with pd.ExcelWriter(output_path, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
+                df_normal.to_excel(writer, sheet_name='NormalData',  index=False)
+                df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
+                df_review.to_excel(writer, sheet_name='Reviews', index=False)
+                df_comfort_data.to_excel(writer, sheet_name='Comfort',  index=False)
+
+        else:
+            print(f"{output_path} does not exits")
+            # just create the file
+            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
+
+                df_normal.to_excel(writer, sheet_name='NormalData',  index=False)
+                df_coordinates.to_excel(writer, sheet_name='Coordinates', index=False)
+                df_review.to_excel(writer, sheet_name='Reviews', index=False)
+                df_comfort_data.to_excel(writer, sheet_name='Comfort',  index=False)
+
 
 
 
