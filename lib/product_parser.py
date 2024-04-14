@@ -385,6 +385,9 @@ class ProductParser:
 
 
 if __name__ == "__main__":
+    from data_saver import DataSaver
+
+
     driver = webdriver.Chrome()
     driver.maximize_window()
     results = []
@@ -399,7 +402,7 @@ if __name__ == "__main__":
 
     for url in urls:
         parser = ProductParser(driver=driver, target_url= url)
-        data = parser.parse()
+        data, _ = parser.parse()
 
         for key, value in data.items():
             print(key)
@@ -410,5 +413,7 @@ if __name__ == "__main__":
         results.append(data)
 
     print(results)
+    data_saver = DataSaver(data=results)
+    data_saver.start()
     
        

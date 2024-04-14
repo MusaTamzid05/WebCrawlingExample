@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 
 class DataSaver:
     def __init__(self, data):
@@ -25,13 +24,14 @@ class DataSaver:
                 normal_data["price"] = row["basic_info"]["price"]
 
                 if len(row["coordinates"]) > 0:
-                    coordinate_data = {}
                     for coordinate_row in row["coordinates"]:
+                        coordinate_data = {}
                         coordinate_data["title"] = coordinate_row["title"]
                         coordinate_data["src_product_url"] = row["product_url"]
                         coordinate_data["url"] = coordinate_row["url"]
                         coordinate_data["image_url"] = coordinate_row["image_url"]
                         coordinate_data["price"] = coordinate_row["price"]
+
                         coordinate_data_list.append(coordinate_data)
 
                 if "inner_data" in row:
@@ -42,8 +42,15 @@ class DataSaver:
 
                 if "chart_size" in row:
                     normal_data["tall_of_size"] = row["chart_size"]
-                
-                normal_data["KWS"] = row["KWS"]
+                else:
+                    normal_data["tall_of_size"] = "N/A"
+
+
+                if "KWS" in row:
+                    normal_data["KWS"] = row["KWS"]
+                else:
+                    normal_data["KWS"] = "N/A"
+
 
                 if "ratting" in row:
                     normal_data["user_ratting"] = row["ratting"]["user_ratting"]
